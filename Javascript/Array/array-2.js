@@ -318,10 +318,7 @@ function filterUsersByTotal(sales, threshold) {
 const usersWithHighTotal = filterUsersByTotal(sales, 200);
 console.log("Danh sách user có tổng tiền > 200:", usersWithHighTotal);
 
-
 //----------------------------------------------------
-
-
 
 // Bài 11: Tìm sản phẩm đắt nhất
 // const products = [
@@ -329,8 +326,20 @@ console.log("Danh sách user có tổng tiền > 200:", usersWithHighTotal);
 //     { name: "B", price: 300 },
 //     { name: "C", price: 200 }
 // ];
-
 // Kết quả: { name: "B", price: 300 }
+
+const products = [
+    { name: "A", price: 100 },
+    { name: "B", price: 300 },
+    { name: "C", price: 200 }
+];
+
+const mostExpensiveProduct = products.reduce((maxProduct, product) => {
+    return (product.price > maxProduct.price) ? product : maxProduct;
+});
+console.log("Sản phẩm đắt nhất:", mostExpensiveProduct);
+
+//----------------------------------------------------
 
 // Bài 12: Đếm số user đang hoạt động;
 // const users = [
@@ -339,6 +348,17 @@ console.log("Danh sách user có tổng tiền > 200:", usersWithHighTotal);
 //     { name: "C", active: true }
 // ];
 
+const users1 = [
+    { name: "A", active: true },
+    { name: "B", active: false },
+    { name: "C", active: true }
+];
+const activeUserCount = users1.reduce((count, user) => {
+    return user.active ? count + 1 : count;
+}, 0);
+console.log("Số user đang hoạt động:", activeUserCount);
+
+//----------------------------------------------------
 
 // Bài 13: Tìm sản phẩm bán chạy nhất
 // const orders = [
@@ -350,10 +370,61 @@ console.log("Danh sách user có tổng tiền > 200:", usersWithHighTotal);
 //     "xiaomi"
 // ];
 
+const orders1 = [
+    "iphone",
+    "iphone",
+    "samsung",
+    "iphone",
+    "xiaomi",
+    "xiaomi"
+];
+
+// function getBestSeller(arr) {
+//     const countMap = {};
+//     let maxCount = 0;
+//     let bestSeller = null;
+//     for (const item of arr) {
+//         countMap[item] = (countMap[item] ?? 0) + 1;
+//         if (countMap[item] > maxCount) {
+//             maxCount = countMap[item];
+//             bestSeller = item;
+//         }
+//     }
+//     return { bestSeller, maxCount };
+// }
+// const list = getBestSeller(orders1);
+// console.log(`Sản phẩm bán nhiều nhất:${list.bestSeller},Số lượng ${list.maxCount}`);
+
+function getBestSeller(arr) {
+    const countMap = arr.reduce((acc, product) => {
+        acc[product] = (acc[product] ?? 0) + 1;
+        return acc;
+    }, {})
+    const bestSeller = Object.entries(countMap).reduce((max, currentValue) => {
+        return currentValue[1] > max[1] ? currentValue : max;
+    })
+    return bestSeller;
+}
+const bestSeller = getBestSeller(orders1);
+console.log(`Sản phẩm bán chạy nhất: ${bestSeller[0]}, Số lượng: ${bestSeller[1]}`);
+
+//----------------------------------------------------
 
 // Bài 14: Tìm số xuất hiện nhiều nhất
 // [1, 1, 2, 2, 2, 3] -> 2
 
+const numbers1 = [1, 1, 2, 2, 2, 3];
+function getMostFrequent(arr) {
+    const groups = Object.groupBy(arr, num => num);
+    const mostFrequentKey = Object.keys(groups).reduce((a, b) => {
+        return groups[a].length > groups[b].length ? a : b;
+    });
+    return Number(mostFrequentKey);
+}
+const mostFrequent = getMostFrequent(numbers1);
+console.log(mostFrequent)
+
+//----------------------------------------------------
 
 // Bài 15: Tìm đơn hàng có giá trị cao nhất
 
@@ -363,6 +434,19 @@ console.log("Danh sách user có tổng tiền > 200:", usersWithHighTotal);
 //     { id: 3, total: 800 }
 // ];
 // Kết quả: { id: 2, total: 1200 }
+
+const orders2 = [
+    { id: 1, total: 500 },
+    { id: 2, total: 1200 },
+    { id: 3, total: 800 }
+];
+
+const maxProductTotal = orders2.reduce((max, order) => {
+    return order.total > max.total ? order : max
+});
+console.log(maxProductTotal);
+
+//----------------------------------------------------
 
 // Bài 16: Đếm số đơn hàng theo trạng thái
 // const orders = [
@@ -377,6 +461,20 @@ console.log("Danh sách user có tổng tiền > 200:", usersWithHighTotal);
 //     cancelled: 1
 // }
 
+const orders3 = [
+    { status: "pending" },
+    { status: "completed" },
+    { status: "pending" },
+    { status: "cancelled" }
+];
+
+const countOrderbyStatus = orders3.reduce((acc, order) => {
+    acc[order.status] = (acc[order.status] ?? 0) + 1;
+    return acc;
+}, {});
+
+console.log("Số đơn hàng theo trạng thái:", countOrderbyStatus);
+//----------------------------------------------------
 
 // Bài 17: Đếm tổng số học sinh
 // const classes = [
@@ -392,9 +490,23 @@ console.log("Danh sách user có tổng tiền > 200:", usersWithHighTotal);
 
 // Kết quả 3
 
+const classes = [
+    {
+        name: "A",
+        students: ["An", "Bình"]
+    },
+    {
+        name: "B",
+        students: ["Cường"]
+    }
+];
 
+const totalStudents = classes.reduce((sum, currentValue) => {
+    return sum + currentValue.students.length;
+}, 0)
+console.log(totalStudents);
 
-
+//----------------------------------------------------
 
 /**
  * 1: Kiểm tra xem một số có phải là số nguyên tố lớn không. Nếu có, in ra số nguyên tố lớn nhất trong khoảng từ 1 đến
@@ -405,6 +517,27 @@ console.log("Danh sách user có tổng tiền > 200:", usersWithHighTotal);
   Output: 13
  */
 
+// Thuật toán kiểm tra số nguyên tố trong khoảng từ 1 đến n
+// + Một số n được điểm tra bằng cách duyệt từ 2 đến đến sqrt{n}. Nếu chia hết cho bất kỳ số nào trong khoảng này, đó không phải là số nguyên tố.
+
+function isPrime(n) {
+    if (n < 2) return false;
+    for (let i = 2; i <= Math.sqrt(n); i++) {
+        if (n % i === 0) return false
+    }
+    return true;
+}
+function findLargestPrimeUpTo(n) {
+    for (let i = n; i >= 2; i--) {
+        if (isPrime(i)) return i;
+    }
+    return null;
+}
+console.log(findLargestPrimeUpTo(20));
+
+
+//----------------------------------------------------
+
 /**
  * Bài 2: Tìm tất cả các cặp số (a, b) sao cho a và b là số nguyên tố và a + b = n, với n là số nguyên dương cho trước.
   Input: 10
@@ -412,6 +545,21 @@ console.log("Danh sách user có tổng tiền > 200:", usersWithHighTotal);
   Input: 20
   Output: (3, 17), (7, 13)
  */
+
+function findPrimePairs(n) {
+    const results = [];
+    for (let a = 2; a <= n / 2; a++) {
+        let b = n - a;
+        if (isPrime(a) && isPrime(b) && a != b) {
+            results.push(`(${a}, ${b})`);
+        }
+    }
+    return results.join(', ');
+}
+
+console.log(findPrimePairs(10));
+console.log(findPrimePairs(20));
+//----------------------------------------------------
 
 /**
  * Bài 3: Cho một mảng nums gồm các số nguyên, hãy trả về số lượng các số trong mảng đó có số chữ số chẵn.
@@ -426,9 +574,26 @@ console.log("Danh sách user có tổng tiền > 200:", usersWithHighTotal);
     7896 có 4 chữ số (số chữ số chẵn).
     Do đó, chỉ có 12 và 7896 có số chữ số chẵn.
  */
+function findNumbers(numbers) {
+    return numbers.filter(num => String(num).length % 2 === 0).length;
+}
+nums = [12, 345, 2, 6, 7896]
+const findNum = findNumbers(nums);
+console.log(findNum);
+//----------------------------------------------------
 
 /**
  * Bài 4: cho mảng number: const arrNumber = [1, 4, 44, 64, 55, 24, 32, 55, 19, 17, 74, 22, 23];
 nếu phần tử trong mảng chẵn thì cho vào mảng evenNumbers = [] => kết quả evenNumber = [4,44,64,24,32,74,22]
 và ngược lại lấy số lẻ cho vào mảng oddNumbers
  */
+
+const arrNumber = [1, 4, 44, 64, 55, 24, 32, 55, 19, 17, 74, 22, 23];
+
+function evenOrOddNumbers(arr) {
+    const evenNumber = arr.filter(num => num % 2 === 0);
+    const oddNumber = arr.filter(num => num % 2 !== 0);
+    return { evenNumber, oddNumber };
+}
+const number = evenOrOddNumbers(arrNumber);
+console.log(number);
