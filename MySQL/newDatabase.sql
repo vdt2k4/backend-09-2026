@@ -29,7 +29,7 @@ VALUES
 
 
 # Lấy tất cả thông tin của nhân viên thuộc phòng ban "IT"
-
+EXPLAIN ANALYZE
 SELECT *
 FROM new_dataBase.Employees e 
 WHERE e.Department = 'IT';
@@ -64,7 +64,6 @@ FOREIGN KEY (EmployeeID) REFERENCES Employees(EmployeeID)
 
 
 # Thêm dữ liệu giả lập
-
 # 5 Bản ghi bán hàng với EmployeeID trùng với Employees
 INSERT INTO Sales(SaleID,EmployeeID,SaleAmount,SaleDate)
 VALUES
@@ -77,12 +76,13 @@ VALUES
 
 # Thực hiện các truy vấn
 # Tính tổng doanh thu từ tất cả các giao dịch.
-
+EXPLAIN ANALYZE
 SELECT SUM(SaleAmount) AS Total
 FROM Sales
 
 
 # Tính doanh thu trung bình của cá nhân trong phòng ban "IT"
+EXPLAIN ANALYZE
 SELECT AVG(SaleAmount) AS Average
 FROM Employees e 
 INNER JOIN Sales s ON s.EmployeeID = e.EmployeeID 
@@ -90,11 +90,12 @@ WHERE e.Department ='IT';
 
 
 # Liệt kê tất cả các nhân viên chưa thực hiện giao dịch nào
+EXPLAIN ANALYZE
 SELECT e.*
 FROM Employees e
-LEFT JOIN Sales s ON e.EmployeeID = s.EmployeeID
-WHERE s.SaleID IS NULL;
-
+-- LEFT JOIN Sales s ON e.EmployeeID = s.EmployeeID
+-- WHERE s.SaleID IS NULL;
+WHERE e.EmployeeID NOT IN (SELECT EmployeeID FROM Sales);
 
 # Bài 3: Thao tác với khóa ngoại và JOIN
 # Tạo bảng Projects với các cột: 
@@ -124,7 +125,6 @@ FOREIGN KEY (ProjectID) REFERENCES Projects(ProjectID)
 
 # Thêm dữ liệu: 
 # 	- 3 dự án cho bảng Projects. 
-
 INSERT INTO Projects(ProjectID,ProjectName,Department)
 VALUES 
 (1,'To-Do List App','R&D'),
@@ -133,7 +133,6 @@ VALUES
 
 
 # 	- 5 bản ghi vào bảng Assignments. 
-
 INSERT INTO Assignments(AssignmentID,EmployeeID,ProjectID)
 VALUES 
 (1,2,1),
@@ -144,10 +143,10 @@ VALUES
 
 # Thực hiện các truy vấn: 
 # 	- Lấy danh sách nhân viên và dự án mà họ tham gia. 
-
-SELECT s.Name, p.ProjectName
-FROM Employees s
-INNER JOIN Assignments a ON a.EmployeeID = s.EmployeeID
+EXPLAIN ANALYZE
+SELECT e.Name, p.ProjectName
+FROM Employees e
+INNER JOIN Assignments a ON a.EmployeeID = e.EmployeeID
 INNER JOIN Projects p ON p.ProjectID = a.ProjectID;
 
 
@@ -156,48 +155,59 @@ INNER JOIN Projects p ON p.ProjectID = a.ProjectID;
 INSERT INTO Employees(EmployeeID,Name,Age,Department,Salary)
 VALUES
 (6,'Nguyen Van Nam',27,'Engineering',1350);
-SELECT *
-FROM Employees s
-LEFT JOIN Assignments a ON a.EmployeeID = s.EmployeeID
-WHERE  a.AssignmentID IS NULL;
 
+EXPLAIN ANALYZE
+SELECT *
+FROM Employees e
+-- LEFT JOIN Assignments a ON a.EmployeeID = e.EmployeeID
+-- WHERE  a.AssignmentID IS NULL;
+WHERE e.EmployeeID NOT IN (SELECT EmployeeID FROM Assignments);
 
 # 	- Tìm số lượng nhân viên trong mỗi dự án.
-
+EXPLAIN ANALYZE
 SELECT p.ProjectID, p.ProjectName, COUNT(a.ProjectID) as CountEmployee
-FROM Employees e
-INNER JOIN Assignments a ON a.EmployeeID = e.EmployeeID
-INNER JOIN Projects p ON p.ProjectID = a.ProjectID
+-- FROM Employees e
+-- INNER JOIN Assignments a ON a.EmployeeID = e.EmployeeID
+-- INNER JOIN Projects p ON p.ProjectID = a.ProjectID
+-- GROUP BY p.ProjectID, p.ProjectName
+FROM Projects p
+LEFT JOIN Assignments a ON a.ProjectID = p.ProjectID
 GROUP BY p.ProjectID, p.ProjectName
-
 
 # Bài 4: Sắp xếp và lọc dữ liệu
 # Với bảng Employees, thực hiện:
 #	- Lấy thông tin nhân viên có lương cao nhất
+EXPLAIN ANALYZE
 SELECT *
 FROM Employees e
 ORDER BY e.Salary DESC   
 LIMIT 1;
 
 #	- Lấy danh sách nhân viên thuộc phòng ban "IT" sắp xếp theo tuổi giảm dần.
+EXPLAIN ANALYZE
 SELECT *
 FROM Employees e
 WHERE e.Department = 'IT'
 ORDER BY e.Age DESC ;
 
 #	- Tìm nhân viên có lương nằm trong khoảng từ 900 đến 1400
+EXPLAIN ANALYZE
 SELECT *
 FROM Employees e
-WHERE e.Salary >= 900 AND e.Salary <= 1400;
+-- WHERE e.Salary >= 900 AND e.Salary <= 1400;
+WHERE e.Salary BETWEEN 900 AND 1400;
 
 # Với bảng Sales, thực hiện:
 #	- Lấy 3 giao dịch có giá trị cao nhất.
+EXPLAIN ANALYZE
 SELECT *
 FROM Sales s
 ORDER BY s.SaleAmount DESC 
 LIMIT 3;
+
 #	- Tìm tất cả các giao dịch được thực hiện trong tháng hiện tại.
+EXPLAIN ANALYZE
 SELECT *
 FROM Sales s
-WHERE MONTH(s.SaleDate) = MONTH(CURDATE());
+WHERE MONTH(s.SaleDate) = MONTH(CURDATE()) AND YEAR(s.SaleDate) = YEAR(CURDATE());
 
