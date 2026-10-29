@@ -3,6 +3,10 @@ import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { UsersModule } from './users/users.module.js';
+import { CategoriesModule } from './categories/categories.module.js';
+import { BooksModule } from './books/books.module.js';
+import { BorrowBookModule } from './borrow-book/borrow-book.module.js';
 
 @Module({
   imports: [
@@ -27,7 +31,15 @@ import { TypeOrmModule } from '@nestjs/typeorm';
           rejectUnauthorized: false,
         }
       }),
-    })
+    }),
+
+    UsersModule,
+
+    CategoriesModule,
+
+    BooksModule,
+
+    BorrowBookModule
   ],
   controllers: [AppController],
   providers: [AppService],
