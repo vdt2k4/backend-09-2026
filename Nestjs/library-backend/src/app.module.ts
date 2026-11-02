@@ -7,6 +7,11 @@ import { UsersModule } from './users/users.module.js';
 import { CategoriesModule } from './categories/categories.module.js';
 import { BooksModule } from './books/books.module.js';
 import { BorrowBookModule } from './borrow-book/borrow-book.module.js';
+import { User } from './users/entities/user.entity.js';
+import { Category } from './categories/entities/category.entity.js';
+import { Book } from './books/entities/book.entity.js';
+import { BorrowBook } from './borrow-book/entities/borrow-book.entity.js';
+import { AuthModule } from './auth/auth.module.js';
 
 @Module({
   imports: [
@@ -24,7 +29,7 @@ import { BorrowBookModule } from './borrow-book/borrow-book.module.js';
         username: configService.get<string>('DB_USERNAME'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_DATABASE'),
-        entities: [], // Chỉ định các entitty ở đâu
+        entities: [User, Category, Book, BorrowBook], // Chỉ định các entitty ở đâu
         synchronize: true, // Tự động tạo bảng từ Entities (chỉ dùng ở Local)
         logging: true, // Log SQL query, chỉ dùng ở local/dev hoặc khi cần debug
         ssl: {
@@ -34,12 +39,10 @@ import { BorrowBookModule } from './borrow-book/borrow-book.module.js';
     }),
 
     UsersModule,
-
     CategoriesModule,
-
     BooksModule,
-
-    BorrowBookModule
+    BorrowBookModule,
+    AuthModule
   ],
   controllers: [AppController],
   providers: [AppService],

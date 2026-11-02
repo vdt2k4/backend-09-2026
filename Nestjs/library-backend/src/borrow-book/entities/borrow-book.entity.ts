@@ -13,7 +13,7 @@ export class BorrowBook {
     @Column({ nullable: false })
     expectReturnDate: Date;
 
-    @Column({ nullable: false })
+    @Column({ nullable: true })
     penaltyMoney: number;
 
     @Column({ nullable: false })

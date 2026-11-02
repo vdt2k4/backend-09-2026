@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module.js';
 import { ConfigService } from '@nestjs/config';
-import { Logger } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 
 // Cách 1: Sử dụng dotenv
 // require('dotenv').config();
@@ -17,6 +17,7 @@ import { Logger } from '@nestjs/common';
 async function bootstrap() {
 
   const app = await NestFactory.create(AppModule);
+  app.useGlobalPipes(new ValidationPipe());
   const configService = app.get(ConfigService);
   const port = configService.get<string>('PORT');
 
