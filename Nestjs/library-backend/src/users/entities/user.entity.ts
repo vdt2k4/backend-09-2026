@@ -6,10 +6,10 @@ export class User {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @Column()
+    @Column({ nullable: true })
     fullName: string;
 
-    @Column()
+    @Column({ nullable: true })
     phone: string;
 
     @Column({ unique: true, nullable: false })
@@ -24,12 +24,14 @@ export class User {
     @Column({ nullable: false, default: true })
     isActive: boolean;
 
+    @OneToMany(() => BorrowBook, (borrowBook) => borrowBook.user)
+    borrowBooks: any;
+
     @Column()
     createAt: Date;
 
     @Column()
     updateAt: Date;
 
-    @OneToMany(() => BorrowBook, (borrowBook) => borrowBook.user)
-    borrowBooks: BorrowBook[];
+
 }

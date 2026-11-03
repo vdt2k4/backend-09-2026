@@ -10,10 +10,10 @@ export class Book {
     @Column({ nullable: false })
     name: string;
 
-    @Column()
+    @Column({ nullable: true })
     author: string;
 
-    @Column()
+    @Column({ nullable: true })
     price: number;
 
     @ManyToOne(() => Category, (category) => category.books, { onDelete: 'SET NULL', nullable: true })
