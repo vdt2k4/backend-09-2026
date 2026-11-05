@@ -1,20 +1,22 @@
 import { BadRequestException, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { RegisterDto } from './dto/register.dto.js';
-import { UpdateAuthDto } from './dto/update-auth.dto.js';
 import { User } from '../users/entities/user.entity.js';
 import { In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role } from '../common/enums/role.enum.js';
 import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/login.dto.js';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>
+    private readonly userRepository: Repository<User>,
+    private readonly jwtService: JwtService,
 
   ) { }
+
   async create(registerDto: RegisterDto) {
     if (registerDto.password !== registerDto.retypePassword) {
       throw new BadRequestException('Mật khẩu không khớp');
@@ -71,32 +73,25 @@ export class AuthService {
       throw new UnauthorizedException('Password invalid');
     }
 
+    // Tạo Token JWT (nếu cần) và trả về thông tin user
+    // 3 thành phần chính của JWT: Header, Payload, Signature
+    const jwtpayload = {
+      sub: user.id,
+      email: user.email, // Optional
+      role: user.role // Optional
+    }
+    // Kí nội dung payload vào token bằng secret key
+    const jwtToken = this.jwtService.sign(jwtpayload);
+
     //B4: Return user info after Login success
     return {
       message: 'Login thành công',
+      accessToken: jwtToken,
       user: {
         id: user.id,
-        email: user.email,
-        phone: user.phone,
-        fullName: user.fullName,
-        role: user.role
+        fullName: user.fullName
       }
     }
   }
 
-  findAll() {
-    return `This action returns all auth`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
-
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
-  }
 }
