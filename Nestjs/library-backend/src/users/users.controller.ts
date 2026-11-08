@@ -7,6 +7,7 @@ import { Role } from '../common/enums/role.enum.js';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard.js';
 import { RolesGuard } from '../auth/guards/roles.guard.js';
+import type { Request } from 'express'
 
 @Controller('users')
 export class UsersController {
@@ -26,6 +27,13 @@ export class UsersController {
   @Roles(Role.ADMIN, Role.USER)
   findAll() {
     return this.usersService.findAll();
+  }
+
+  @Get('/profile')
+  @UseGuards(JwtAuthGuard)
+  getProfile(@Req() req: Request) {
+    const user: any = req.user;
+    return this.usersService.getProfile(user.userId);
   }
 
   @Get(':id')
