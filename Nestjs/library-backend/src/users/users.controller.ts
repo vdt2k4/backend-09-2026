@@ -8,6 +8,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard.js';
 import { RolesGuard } from '../auth/guards/roles.guard.js';
 import type { Request } from 'express'
+import { ChangePasswordDto } from './dto/change-password.dto.js';
 
 @Controller('users')
 export class UsersController {
@@ -34,6 +35,13 @@ export class UsersController {
   getProfile(@Req() req: Request) {
     const user: any = req.user;
     return this.usersService.getProfile(user.userId);
+  }
+
+  @Patch('/change-password')
+  @UseGuards(JwtAuthGuard)
+  changePassword(@Req() req: Request, @Body() changePasswordDto: ChangePasswordDto) {
+    const reqUser: any = req.user;
+    return this.usersService.changePassword(reqUser, changePasswordDto);
   }
 
   @Get(':id')
