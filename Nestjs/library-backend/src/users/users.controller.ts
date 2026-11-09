@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, UseInterceptors, UploadedFile, ParseUUIDPipe } from '@nestjs/common';
 import { UsersService } from './users.service.js';
 import { CreateUserDto } from './dto/create-user.dto.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
@@ -12,27 +12,13 @@ import { ChangePasswordDto } from './dto/change-password.dto.js';
 import { FileInterceptor } from '@nestjs/platform-express';
 import 'multer';
 import { diskStorage } from 'multer';
+import { AdminChangePasswordDto } from './dto/admin.change-password.dto.js';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 
-  @Post()
-  // Role Admin
-  @Roles(Role.ADMIN)
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
-  }
-
-  @Get()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  // Role Admin và User
-  // @Roles(Role.ADMIN, Role.USER)
-  @Roles(Role.ADMIN, Role.USER)
-  findAll() {
-    return this.usersService.findAll();
-  }
-
+  // === USER API ====
   @Get('/profile')
   @UseGuards(JwtAuthGuard)
   getProfile(@Req() req: Request) {
@@ -71,6 +57,52 @@ export class UsersController {
     return this.usersService.changeAvatar(reqUser, file);
   }
 
+  // === ADMIN API ====
+
+  // Thay đổi mật khẩu
+  @Patch('/admin/change-user-password')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  adminChangePassword(@Body() changePasswordDto: AdminChangePasswordDto) {
+    return this.usersService.adminChangePassword(changePasswordDto);
+  }
+
+  // Tạo tại tài khoản
+  @Post('admin/create-user')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  // Role Admin
+  @Roles(Role.ADMIN)
+  createUser(@Body() createUserDto: CreateUserDto) {
+    return this.usersService.createUser(createUserDto);
+  }
+
+  // Lấy ra tất cả users, ngoại trừ Admin
+  @Get('admin/all-users')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  adminGetAllUsers(@Req() req: Request) {
+    const reqUser: any = req.user;
+    return this.usersService.adminGetAllUsers(reqUser.id);
+  }
+
+  // Cập nhật thông tin user theo Id
+  @Patch('admin/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  adminUpdateUser(@Param('id', ParseUUIDPipe) id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.adminUpdateUser(id, updateUserDto);
+  }
+
+  @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  // Role Admin và User
+  // @Roles(Role.ADMIN, Role.USER)
+  @Roles(Role.ADMIN, Role.USER)
+  findAll() {
+    return this.usersService.findAll();
+  }
+
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(+id);
@@ -85,7 +117,4 @@ export class UsersController {
   remove(@Param('id') id: string) {
     return this.usersService.remove(+id);
   }
-
-
-
 }
