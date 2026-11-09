@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
 import { UsersService } from './users.service.js';
 import { CreateUserDto } from './dto/create-user.dto.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
@@ -34,7 +34,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   getProfile(@Req() req: Request) {
     const user: any = req.user;
-    return this.usersService.getProfile(user.userId);
+    return this.usersService.getProfile(user.id);
   }
 
   @Patch('/change-password')
