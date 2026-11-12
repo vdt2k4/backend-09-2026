@@ -9,6 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { AdminChangePasswordDto } from './dto/admin.change-password.dto.js';
 import { Role } from '../common/enums/role.enum.js';
+import { ToggleActiveDto } from './dto/toggle-active.dto.js';
 
 @Injectable()
 export class UsersService {
@@ -18,25 +19,40 @@ export class UsersService {
     private readonly configService: ConfigService,
   ) { }
 
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  findOne(id: string) {
+    return this.userRepository.findOne({
+      where: {
+        id,
+      },
+    });
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async remove(id: string) {
+    const user = await this.userRepository.findOne({
+      where: { id, },
+    });
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+    await this.userRepository.remove(user);
+    return {
+      message: 'User removed successfully'
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async toggleActive(id: string, toggleActiveDto: ToggleActiveDto) {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    // Cập nhật thông tin
+    user.isActive = toggleActiveDto.isActive;
+    await this.userRepository.save(user);
+    return {
+      message: 'User status changed successfully',
+    }
   }
-
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
-  remove(id: number) {
-    return `This action removes a #${id} user`;
-  }
-
   // Me
   async getProfile(id: string) {
     const user = await this.userRepository.findOne({
@@ -165,28 +181,33 @@ export class UsersService {
     };
   }
 
-  // Lấy ra tất cả các users, ngoại trừ Admin
-  async adminGetAllUsers(adminId: string) {
+  // Lấy ra tất cả các users
+  async findAll(queryParams: any) {
+    const where = {
+      email: '',
+      phone: '',
+      role: '',
+    };
+    if (queryParams.email) {
+      where.email = queryParams.email;
+    }
+    if (queryParams.phone) {
+      where.phone = queryParams.phone;
+    }
+    if (queryParams.role) {
+      where.role = queryParams.role;
+    }
+
     const users = await this.userRepository.find({
-      where: {
-        id: Not(adminId),
-      },
-      select: {
-        'id': true,
-        'fullName': true,
-        'phone': true,
-        'email': true,
-        'role': true,
-        'isActive': true,
-      }
+      where,
     });
     return users;
   }
 
 
   // Tạo users thông qua Admin
-  async createUser(createUserDto: CreateUserDto) {
-    const email = createUserDto.email.trim();
+  async create(createUserDto: CreateUserDto) {
+    const { email, password, fullName, phone, role } = createUserDto;
     // B1: Kiểm tra email đã tồn tại chưa
     const existingUser = await this.userRepository.findOne({
       where: {
@@ -202,54 +223,31 @@ export class UsersService {
     const newUser = this.userRepository.create({
       email,
       password: hashedPassword,
-      fullName: createUserDto.fullName.trim(),
-      phone: createUserDto.phone?.trim(),
-      role: createUserDto.role ?? Role.USER,
-      isActive: createUserDto.isActive ?? true,
+      fullName,
+      phone,
+      role: role || 'USER',
       createAt: new Date(),
       updateAt: new Date(),
     });
-    await this.userRepository.save(newUser);
-    // B4: Không trả password
-    return {
-      message: 'User created successfully',
-      user: {
-        id: newUser.id,
-        email: newUser.email,
-        fullName: newUser.fullName,
-        phone: newUser.phone,
-        role: newUser.role,
-        isActive: newUser.isActive,
-      }
-    };
+    return await this.userRepository.save(newUser);
   }
 
   // Cập nhật thông tin user theo Id(chỉ Admin mới chỉnh sửa được)
-  async adminUpdateUser(id: string, updateUserDto: UpdateUserDto) {
+  async update(id: string, updateUserDto: UpdateUserDto) {
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {
       throw new NotFoundException('User not found');
     }
-
-    // Cập nhật thông tin (field nào không gửi thì giữ nguyên giá trị cũ)
-    user.fullName = updateUserDto.fullName?.trim() ?? user.fullName;
-    user.phone = updateUserDto.phone?.trim() ?? user.phone;
-    user.role = updateUserDto.role ?? user.role;
-    user.isActive = updateUserDto.isActive ?? user.isActive;
+    // Cập nhật thông tin
+    user.email = updateUserDto.email || user.email;
+    user.phone = updateUserDto.phone || user.phone;
+    user.role = updateUserDto.role || user.role;
+    user.fullName = updateUserDto.fullName || user.fullName;
     user.updateAt = new Date();
-
     await this.userRepository.save(user);
     return {
       message: 'User updated successfully',
-      user: {
-        id: user.id,
-        email: user.email,
-        fullName: user.fullName,
-        phone: user.phone,
-        role: user.role,
-        isActive: user.isActive,
-      },
-    };
+    }
   }
 
 }
