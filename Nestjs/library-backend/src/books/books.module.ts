@@ -4,11 +4,12 @@ import { BooksController } from './books.controller.js';
 import { AuthModule } from '../auth/auth.module.js';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Book } from './entities/book.entity.js';
+import { Category } from '../categories/entities/category.entity.js';
 
 @Module({
   imports: [
     AuthModule,
-    TypeOrmModule.forFeature([Book]),
+    TypeOrmModule.forFeature([Book, Category]),
   ],
   controllers: [BooksController],
   providers: [BooksService],
