@@ -6,6 +6,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard.js';
 import { RolesGuard } from '../auth/guards/roles.guard.js';
 import { Roles } from '../auth/decorators/roles.decarator.js';
 import { Role } from '../common/enums/role.enum.js';
+import { QueryListBookDto } from './dto/query-list-book.dto.js';
 
 @Controller('books')
 export class BooksController {
@@ -19,8 +20,8 @@ export class BooksController {
   }
 
   @Get()
-  findAll() {
-    return this.booksService.findAll();
+  findAll(@Query() queryDto:QueryListBookDto) {
+    return this.booksService.findAll(queryDto);
   }
 
   @Get(':id')

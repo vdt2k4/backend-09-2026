@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Book } from './entities/book.entity.js';
 import { Not, Repository } from 'typeorm';
 import { Category } from '../categories/entities/category.entity.js';
+import { QueryListBookDto } from './dto/query-list-book.dto.js';
 
 @Injectable()
 export class BooksService {
@@ -47,11 +48,17 @@ export class BooksService {
     return this.bookRepository.save(book);
   }
 
-  findAll() {
+  findAll(queryDto:QueryListBookDto) {
+    // const page = queryDto.page;
+    const {page = 1,limit = 10} = queryDto;
+    const offset = (page-1)*limit;
+
     return this.bookRepository.find({
       relations: {
         category: true,
       },
+      skip:offset,
+      take:limit,
     });
   }
 
