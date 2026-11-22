@@ -48,17 +48,17 @@ export class BooksService {
     return this.bookRepository.save(book);
   }
 
-  findAll(queryDto:QueryListBookDto) {
+  findAll(queryDto: QueryListBookDto) {
     // const page = queryDto.page;
-    const {page = 1,limit = 10} = queryDto;
-    const offset = (page-1)*limit;
+    const { page = 1, limit = 10 } = queryDto;
+    const offset = (page - 1) * limit;
 
     return this.bookRepository.find({
       relations: {
         category: true,
       },
-      skip:offset,
-      take:limit,
+      skip: offset,
+      take: limit,
     });
   }
 
@@ -112,6 +112,7 @@ export class BooksService {
     book.name = updateBookDto.name || book.name;
     book.price = updateBookDto.price || book.price;
     book.category = existsCategory || book.category;
+    book.availableNumber = updateBookDto.availableNumber || book.availableNumber;
     book.updateAt = new Date();
 
     return this.bookRepository.save(book);

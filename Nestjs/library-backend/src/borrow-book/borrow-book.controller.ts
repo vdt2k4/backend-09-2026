@@ -1,15 +1,23 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
 import { BorrowBookService } from './borrow-book.service.js';
 import { CreateBorrowBookDto } from './dto/create-borrow-book.dto.js';
-import { UpdateBorrowBookDto } from './dto/update-borrow-book.dto.js';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard.js';
+import { RolesGuard } from '../auth/guards/roles.guard.js';
+import { Roles } from '../auth/decorators/roles.decarator.js';
+import { Role } from '../common/enums/role.enum.js';
+import { ReturnBorrowBookDto } from './dto/return-borrow_book.dto.js';
 
 @Controller('borrow-book')
 export class BorrowBookController {
-  constructor(private readonly borrowBookService: BorrowBookService) {}
+  constructor(private readonly borrowBookService: BorrowBookService) { }
 
   @Post()
-  create(@Body() createBorrowBookDto: CreateBorrowBookDto) {
-    return this.borrowBookService.create(createBorrowBookDto);
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.USER)
+  create(@Req() req: any, @Body() createBorrowBookDto: CreateBorrowBookDto) {
+    const user = req.user;
+    const userId = user.id;
+    return this.borrowBookService.create(userId, createBorrowBookDto);
   }
 
   @Get()
@@ -17,18 +25,32 @@ export class BorrowBookController {
     return this.borrowBookService.findAll();
   }
 
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.borrowBookService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateBorrowBookDto: UpdateBorrowBookDto) {
-    return this.borrowBookService.update(+id, updateBorrowBookDto);
+
+  // Admin API
+  @Patch(':id/approve')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.LIBRARIAN)
+  update(@Param('id') id: string) {
+    return this.borrowBookService.approveBorrow(id);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.borrowBookService.remove(+id);
+  @Patch(':id/reject')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.LIBRARIAN)
+  reject(@Param('id') id: string) {
+    return this.borrowBookService.rejectBorrow(id);
+  }
+
+  @Patch(':id/return')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.LIBRARIAN)
+  return(@Param('id') id: string, @Body() returnBorrowBookDto: ReturnBorrowBookDto) {
+    return this.borrowBookService.returnBorrow(id, returnBorrowBookDto);
   }
 }
