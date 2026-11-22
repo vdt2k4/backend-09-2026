@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
 import { BooksService } from './books.service.js';
 import { CreateBookDto } from './dto/create-book.dto.js';
 import { UpdateBookDto } from './dto/update-book.dto.js';
@@ -20,7 +20,7 @@ export class BooksController {
   }
 
   @Get()
-  findAll(@Query() queryDto:QueryListBookDto) {
+  findAll(@Query() queryDto: QueryListBookDto) {
     return this.booksService.findAll(queryDto);
   }
 
