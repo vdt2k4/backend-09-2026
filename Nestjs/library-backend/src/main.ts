@@ -5,6 +5,8 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { TransformResponseInterceptor } from './common/interceptors/transform-response.interceptor.js';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter.js';
 
 // Cách 1: Sử dụng dotenv
 // require('dotenv').config();
@@ -32,6 +34,10 @@ async function bootstrap() {
   });
 
   app.useGlobalPipes(new ValidationPipe());
+
+  // Interceptor
+  app.useGlobalInterceptors(new TransformResponseInterceptor());
+  app.useGlobalFilters(new AllExceptionsFilter());
   const configService = app.get(ConfigService);
   const port = configService.get<string>('PORT');
 
