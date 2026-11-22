@@ -14,6 +14,7 @@ import 'multer';
 import { diskStorage } from 'multer';
 import { AdminChangePasswordDto } from './dto/admin.change-password.dto.js';
 import { ToggleActiveDto } from './dto/toggle-active.dto.js';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('users')
 export class UsersController {
@@ -22,6 +23,7 @@ export class UsersController {
   // === USER API ====
   @Get('/profile')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
   getProfile(@Req() req: Request) {
     const user: any = req.user;
     return this.usersService.getProfile(user.id);
@@ -29,6 +31,7 @@ export class UsersController {
 
   @Patch('/change-password')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
   changePassword(@Req() req: Request, @Body() changePasswordDto: ChangePasswordDto) {
     const reqUser: any = req.user;
     return this.usersService.changePassword(reqUser, changePasswordDto);
@@ -36,6 +39,7 @@ export class UsersController {
 
   @Patch('/change-avatar')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
   @UseInterceptors(FileInterceptor('avatar', {
     storage: diskStorage({
       destination: './uploads/avatar',
@@ -65,6 +69,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   // Role Admin
   @Roles(Role.ADMIN)
+  @ApiBearerAuth('access-token')
   addUser(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
@@ -74,6 +79,7 @@ export class UsersController {
   @Patch('/admin/change-user-password')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @ApiBearerAuth('access-token')
   adminChangePassword(@Body() changePasswordDto: AdminChangePasswordDto) {
     return this.usersService.adminChangePassword(changePasswordDto);
   }
@@ -82,6 +88,7 @@ export class UsersController {
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN || Role.LIBRARIAN)
+  @ApiBearerAuth('access-token')
   findAll(@Query('email') email: string, @Query('phone') phone: string, @Query('role') role: string) {
     const queryParams = {
       email,
@@ -103,6 +110,7 @@ export class UsersController {
   @Get(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN || Role.LIBRARIAN)
+  @ApiBearerAuth('access-token')
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(id);
   }
@@ -111,6 +119,7 @@ export class UsersController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @ApiBearerAuth('access-token')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(id, updateUserDto);
   }
@@ -119,6 +128,7 @@ export class UsersController {
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @ApiBearerAuth('access-token')
   remove(@Param('id') id: string) {
     return this.usersService.remove(id);
   }
@@ -127,6 +137,7 @@ export class UsersController {
   @Patch(':id/toggle-active')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @ApiBearerAuth('access-token')
   toggleActive(@Param('id') id: string, @Body() toggleActiveDto: ToggleActiveDto) {
     return this.usersService.toggleActive(id, toggleActiveDto);
   }

@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { TransformResponseInterceptor } from './common/interceptors/transform-response.interceptor.js';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter.js';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 // Cách 1: Sử dụng dotenv
 // require('dotenv').config();
@@ -41,9 +42,29 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const port = configService.get<string>('PORT');
 
-
+  // Swagger
+  const config = new DocumentBuilder()
+    .setTitle('Library API docs')
+    .setDescription('Tài liệu Library API')
+    .setVersion('1.0.0')
+    .addTag('library')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'Authorization',
+        description: 'Nhập JWT',
+        in: 'header',
+      },
+      'access-token',
+    )
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/docs', app, document);
   await app.listen(process.env.PORT ?? 3000);
 
   Logger.log(`Application is runing on: ${port}`);
+  Logger.log(`Swagger docs is running on: ${port}/api/docs`);
 }
 await bootstrap();
