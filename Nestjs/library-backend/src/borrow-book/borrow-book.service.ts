@@ -6,6 +6,8 @@ import { DataSource, In, Repository } from 'typeorm';
 import { BorrowBook } from './entities/borrow-book.entity.js';
 import { BorrowStatus } from '../common/enums/borrow-status.enum.js';
 import { ReturnBorrowBookDto } from './dto/return-borrow_book.dto.js';
+import { Roles } from '../auth/decorators/roles.decarator.js';
+import { Role } from '../common/enums/role.enum.js';
 
 @Injectable()
 export class BorrowBookService {
@@ -170,6 +172,28 @@ export class BorrowBookService {
     }
   }
 
+  async findAllByUser(user: any) {
+    const { role, id } = user;
+    if (role == Role.USER) {
+      // Truy vấn dữ liệu Id
+      const borrowBooks = await this.borrowBookRepository.find({
+        where: {
+          user: { id },
+        },
+        // Không trả về user, lộ thông tin 
+        // relations: { book: true, user: true }
+        relations: { book: true }
+      });
+      return borrowBooks;
+    }
+    // Truy vấn All dữ liệu
+    const borrowBooks = await this.borrowBookRepository.find({
+      // Không trả về user, lộ thông tin 
+      // relations: { book: true, user: true }
+      relations: { book: true }
+    });
+    return borrowBooks;
+  }
   findAll() {
     return `This action returns all borrowBook`;
   }
